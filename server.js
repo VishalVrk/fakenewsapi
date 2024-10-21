@@ -37,7 +37,7 @@ app.post('/predict', async (req, res) => {
         
         Prediction: A one-line statement confirming if the information is true or false with a percentage of certainty.
         Justification: A brief paragraph (under 1000 characters) explaining the reasoning behind the prediction.`,
-        radio: 72, // This value can be changed based on your API requirements
+        radio: "72B", // This value can be changed based on your API requirements
       }
     );
 
