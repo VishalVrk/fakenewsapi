@@ -1,12 +1,20 @@
 import express from 'express';
 import cors from 'cors';
 import { Client } from '@gradio/client';
+import  Configuration from 'openai'
+import  OpenAIApi  from 'openai';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5002;
+
+// OpenAI Configuration
+const configuration = new Configuration({
+  apiKey: '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',
+});
+const openai = new OpenAIApi(configuration);
 
 app.post('/predict', async (req, res) => {
   const { text } = req.body; // Get the input text from the client
@@ -46,6 +54,39 @@ app.post('/predict', async (req, res) => {
   } catch (error) {
     console.error('Error connecting to Gradio API:', error);
     res.status(500).json({ error: "Error connecting to Gradio API" });
+  }
+});
+
+app.post('/suggest', async (req, res) => {
+  const { query } = req.body;
+
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return res.status(400).json({ suggestions: [], error: 'Invalid query provided' });
+  }
+
+  try {
+    const messages = [
+      { role: 'system', content: 'You are a helpful assistant.' },
+      { role: 'user', content: `Given the text "${query}", suggest a list of 5 related completions or phrases.` },
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo', // Use gpt-4 or gpt-3.5-turbo as needed
+      messages,
+      max_tokens: 100,
+      temperature: 0.7,
+    });
+
+    const suggestionsRaw = response.choices[0]?.message?.content || '';
+    const suggestions = suggestionsRaw
+      .split('\n')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    res.json({ suggestions });
+  } catch (error) {
+    console.error('Error with OpenAI API:', error.response?.data || error.message || error);
+    res.status(500).json({ error: 'Failed to fetch suggestions from OpenAI' });
   }
 });
 
