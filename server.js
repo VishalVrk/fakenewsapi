@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5002;
 
 // OpenAI Configuration
 const configuration = new Configuration({
-  apiKey: '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',
+  apiKey: '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',
 });
 const openai = new OpenAIApi(configuration);
 
