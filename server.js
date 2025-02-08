@@ -40,7 +40,7 @@ app.post('/predict', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gemini-1.5-pro',
+        model: 'claude-3-5-sonnet-latest',
         messages: [{ role: 'user', content: `From the given news: ${text} confirm the given news is real or fake and give justifications like a news detector` }],
         max_tokens: 512,
         stream: false,
@@ -73,11 +73,11 @@ app.post('/suggest', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gemini-1.5-pro',
+        model: 'claude-3-5-sonnet-latest',
         messages: [
           {
             role: 'user',
-            content: `Given the text "${query}", suggest a list of 5 related completions or phrases.`,
+            content: `Given the text "${query}", suggest a list of 5 related completions or phrases within 10 words.`,
           },
         ],
         max_tokens: 100,
