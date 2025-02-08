@@ -11,10 +11,33 @@ app.use(express.json());
 const PORT = process.env.PORT || 5002;
 
 // OpenAI Configuration
-const configuration = new Configuration({
-  apiKey: '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',
+let configuration = new Configuration({
+  apiKey: 'default-key', // Placeholder key or leave as empty
 });
-const openai = new OpenAIApi(configuration);
+
+let openai = new OpenAIApi(configuration);
+
+app.post('/update-api-key', (req, res) => {
+  const { apiKey } = req.body;
+
+  if (!apiKey || typeof apiKey !== 'string') {
+    return res.status(400).json({ error: 'Invalid API key provided' });
+  }
+
+  try {
+    // Update the Configuration object
+    configuration = new Configuration({
+      apiKey,
+    });
+
+    openai = new OpenAIApi(configuration); // Reinitialize OpenAI client
+    console.log('API key updated successfully'); // For debug; remove in production
+    res.status(200).json({ message: 'API key updated successfully' });
+  } catch (error) {
+    console.error('Failed to update API key:', error);
+    res.status(500).json({ error: 'Failed to update API key' });
+  }
+});
 
 app.post('/predict', async (req, res) => {
   const { text } = req.body; // Get the input text from the client
