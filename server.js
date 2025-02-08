@@ -40,8 +40,8 @@ app.post('/predict', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-2024-08-06',
-        messages: [{ role: 'user', content: text }],
+        model: 'deepseek-ai/deepseek-llm-67b-chat',
+        messages: [{ role: 'user', content: `your a news detector from the given news: ${text} confirm the given news is real or fake and give justifications like a news detector` }],
         max_tokens: 512,
         stream: false,
       }),
@@ -73,7 +73,7 @@ app.post('/suggest', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-2024-08-06',
+        model: 'deepseek-ai/deepseek-llm-67b-chat',
         messages: [
           {
             role: 'user',
