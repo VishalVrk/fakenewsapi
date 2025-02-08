@@ -41,7 +41,7 @@ app.post('/predict', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-latest',
-        messages: [{ role: 'user', content: `From the given news: ${text} confirm the given news is real or fake and give justifications like a news detector` }],
+        messages: [{ role: 'user', content: `From the given news: ${text} confirm the given news is real or fake and give justifications like a news detector within 50 words also give me % of information given is real or fake first` }],
         max_tokens: 512,
         stream: false,
       }),
