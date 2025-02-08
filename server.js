@@ -1,21 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { Client } from '@gradio/client';
-import  Configuration from 'openai'
-import  OpenAIApi  from 'openai';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5002;
-
-// OpenAI Configuration
-let configuration = new Configuration({
-  apiKey: 'default-key', // Placeholder key or leave as empty
-});
-
-let openai = new OpenAIApi(configuration);
+const AIML_API_KEY = 'my_key'; // Replace with your actual API key
 
 app.post('/update-api-key', (req, res) => {
   const { apiKey } = req.body;
@@ -25,13 +16,8 @@ app.post('/update-api-key', (req, res) => {
   }
 
   try {
-    // Update the Configuration object
-    configuration = new Configuration({
-      apiKey,
-    });
-
-    openai = new OpenAIApi(configuration); // Reinitialize OpenAI client
-    console.log('API key updated successfully'); // For debug; remove in production
+    global.AIML_API_KEY = apiKey; // Update the global API key
+    console.log('API key updated successfully'); // Debugging purposes
     res.status(200).json({ message: 'API key updated successfully' });
   } catch (error) {
     console.error('Failed to update API key:', error);
@@ -40,43 +26,37 @@ app.post('/update-api-key', (req, res) => {
 });
 
 app.post('/predict', async (req, res) => {
-  const { text } = req.body; // Get the input text from the client
+  const { text } = req.body;
+
+  if (!text || typeof text !== 'string' || text.trim() === '') {
+    return res.status(400).json({ error: 'Invalid input text provided' });
+  }
+
   try {
-    // Step 1: Connect to the Qwen/Qwen2.5 Gradio Space
-    const client = await Client.connect("Qwen/Qwen2.5");
+    const response = await fetch('https://api.aimlapi.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${AIML_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: text,
+          },
+        ],
+        max_tokens: 512,
+        stream: false,
+      }),
+    });
 
-    // Step 2: Modify the system session with the prompt
-    await client.predict(
-      "/modify_system_session",
-      {
-        system: `Given an input (whether it's a link or a question), verify its accuracy using available online resources. 
-        Determine if the information is true or false. Provide the output in the following format:
-        
-        Prediction: A one-line statement confirming if the information is true or false with a percentage of certainty.
-        Justification: A brief paragraph (under 1000 characters) explaining the reasoning behind the prediction.`,
-      }
-    );
-
-    // Step 3: Get the prediction using the modified system
-    const result = await client.predict(
-      "/model_chat_1",
-      {
-        query: text, // Send the user input (text) as the query
-        history: [], // Empty history
-        system: `Given an input (whether it's a link or a question), verify its accuracy using available online resources. 
-        Determine if the information is true or false. Provide the output in the following format:
-        
-        Prediction: A one-line statement confirming if the information is true or false with a percentage of certainty.
-        Justification: A brief paragraph (under 1000 characters) explaining the reasoning behind the prediction.`,
-        radio: "72B", // This value can be changed based on your API requirements
-      }
-    );
-
-    // Step 4: Send the prediction result back to the client
-    res.json({ prediction: result.data });
+    const result = await response.json();
+    res.json({ prediction: result });
   } catch (error) {
-    console.error('Error connecting to Gradio API:', error);
-    res.status(500).json({ error: "Error connecting to Gradio API" });
+    console.error('Error calling AIML API:', error);
+    res.status(500).json({ error: 'Error connecting to AIML API' });
   }
 });
 
@@ -88,28 +68,34 @@ app.post('/suggest', async (req, res) => {
   }
 
   try {
-    const messages = [
-      { role: 'system', content: 'You are a helpful assistant.' },
-      { role: 'user', content: `Given the text "${query}", suggest a list of 5 related completions or phrases.` },
-    ];
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // Use gpt-4 or gpt-3.5-turbo as needed
-      messages,
-      max_tokens: 100,
-      temperature: 0.7,
+    const response = await fetch('https://api.aimlapi.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${AIML_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: `Given the text "${query}", suggest a list of 5 related completions or phrases.`,
+          },
+        ],
+        max_tokens: 100,
+        temperature: 0.7,
+        stream: false,
+      }),
     });
 
-    const suggestionsRaw = response.choices[0]?.message?.content || '';
-    const suggestions = suggestionsRaw
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+    const data = await response.json();
+    const suggestionsRaw = data.choices?.[0]?.message?.content || '';
+    const suggestions = suggestionsRaw.split('\n').map((s) => s.trim()).filter((s) => s.length > 0);
 
     res.json({ suggestions });
   } catch (error) {
-    console.error('Error with OpenAI API:', error.response?.data || error.message || error);
-    res.status(500).json({ error: 'Failed to fetch suggestions from OpenAI' });
+    console.error('Error with AIML API:', error);
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
   }
 });
 
