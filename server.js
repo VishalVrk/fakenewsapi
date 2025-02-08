@@ -40,7 +40,7 @@ app.post('/predict', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-2024-08-06',
         messages: [{ role: 'user', content: text }],
         max_tokens: 512,
         stream: false,
@@ -73,7 +73,7 @@ app.post('/suggest', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-2024-08-06',
         messages: [
           {
             role: 'user',
