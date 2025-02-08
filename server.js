@@ -41,24 +41,22 @@ app.post('/predict', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gpt-4o',
-        messages: [
-          {
-            role: 'user',
-            content: `predict the given ${text} is real or fake with accuracy percentage`,
-          },
-        ],
+        messages: [{ role: 'user', content: text }],
         max_tokens: 512,
         stream: false,
       }),
     });
 
     const result = await response.json();
-    res.json({ prediction: result });
+    const content = result?.choices?.[0]?.message?.content || 'No response received';
+
+    res.json({ content });
   } catch (error) {
     console.error('Error calling AIML API:', error);
     res.status(500).json({ error: 'Error connecting to AIML API' });
   }
 });
+
 
 app.post('/suggest', async (req, res) => {
   const { query } = req.body;
