@@ -44,7 +44,7 @@ app.post('/predict', async (req, res) => {
         messages: [
           {
             role: 'user',
-            content: text,
+            content: `predict the given ${text} is real or fake with accuracy percentage`,
           },
         ],
         max_tokens: 512,
