@@ -32,6 +32,12 @@ app.post('/predict', async (req, res) => {
     return res.status(400).json({ error: 'Invalid input text provided' });
   }
 
+  const prompt= `Given an input (whether it's a link or a question), verify its accuracy using available online resources. 
+        Determine if the information is true or false. Provide the output in the following format:
+        
+        Prediction: A one-line statement confirming if the information is true or false with a percentage of certainty.
+        Justification: A brief paragraph (under 1000 characters) explaining the reasoning behind the prediction.`
+
   try {
     const response = await fetch('https://api.aimlapi.com/chat/completions', {
       method: 'POST',
@@ -40,8 +46,8 @@ app.post('/predict', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-latest',
-        messages: [{ role: 'user', content: `From the given news: ${text} confirm the given news is real or fake and give justifications like a news detector within 50 words also give me % of information given is real or fake first` }],
+        model: 'Qwen/Qwen2.5-72B-Instruct-Turbo',
+        messages: [{ role: 'user', content: `${prompt}: ${text}` }],
         max_tokens: 512,
         stream: false,
       }),
