@@ -6,7 +6,7 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5002;
-const AIML_API_KEY = 'my_key'; // Replace with your actual API key
+const AIML_API_KEY = '6cb41c23403144868c5befe28e649fc4'; // Replace with your actual API key
 
 app.post('/update-api-key', (req, res) => {
   const { apiKey } = req.body;
