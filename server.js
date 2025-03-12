@@ -46,7 +46,7 @@ app.post('/predict', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
         messages: [{ role: 'user', content: `${prompt}: ${text}` }],
         max_tokens: 512,
         stream: false,
@@ -78,7 +78,7 @@ app.post('/suggest', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
         messages: [
           {
             role: 'user',
